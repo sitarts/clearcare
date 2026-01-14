@@ -13,24 +13,15 @@ export function NewPatient() {
 
   const createPatient = useMutation({
     mutationFn: async (data: PatientFormData) => {
-      // Calculate BMI if height and weight are provided
-      let bmi: number | undefined
-      if (data.height_cm && data.weight_kg) {
-        const heightInMeters = Number(data.height_cm) / 100
-        bmi = parseFloat((Number(data.weight_kg) / (heightInMeters * heightInMeters)).toFixed(1))
-      }
-
       // Clean up empty strings to nulls
+      // Note: BMI is a generated column in the database, calculated automatically
       const cleanedData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [key, value === '' ? null : value])
       )
 
       const { data: patient, error } = await supabase
         .from('patients_female')
-        .insert({
-          ...cleanedData,
-          bmi,
-        } as any)
+        .insert(cleanedData as any)
         .select()
         .single()
 

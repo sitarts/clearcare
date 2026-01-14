@@ -28,14 +28,8 @@ export function EditPatient() {
 
   const updatePatient = useMutation({
     mutationFn: async (data: PatientFormData) => {
-      // Calculate BMI if height and weight are provided
-      let bmi: number | undefined
-      if (data.height_cm && data.weight_kg) {
-        const heightInMeters = Number(data.height_cm) / 100
-        bmi = parseFloat((Number(data.weight_kg) / (heightInMeters * heightInMeters)).toFixed(1))
-      }
-
       // Clean up empty strings to nulls
+      // Note: BMI is a generated column in the database, calculated automatically
       const cleanedData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [key, value === '' ? null : value])
       )
@@ -44,7 +38,6 @@ export function EditPatient() {
         .from('patients_female') as any)
         .update({
           ...cleanedData,
-          bmi,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id as string)
