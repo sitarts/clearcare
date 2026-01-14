@@ -5,44 +5,50 @@ import { Button, Card, CardHeader, CardTitle, CardContent, Input, Textarea, Sele
 import { Save, X } from 'lucide-react'
 
 const patientSchema = z.object({
+  // Required Fields
+  am: z.coerce.number().min(1, 'AM is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  date_of_birth: z.string().min(1, 'Date of birth is required'),
+
   // Personal Info
-  surname: z.string().min(1, 'Surname is required'),
-  name: z.string().min(1, 'Name is required'),
-  dob: z.string().optional(),
+  maiden_name: z.string().optional(),
   nationality: z.string().optional(),
   mother_name: z.string().optional(),
   father_name: z.string().optional(),
   occupation: z.string().optional(),
 
   // Identification
-  am: z.coerce.number().optional(),
   amka: z.string().optional(),
-  afm: z.string().optional(),
-  insurance: z.string().optional(),
+  eopyy_number: z.string().optional(),
+  insurance_provider: z.string().optional(),
+  insurance_number: z.string().optional(),
 
   // Contact
-  phone: z.string().optional(),
   mobile: z.string().optional(),
   landline: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   address: z.string().optional(),
   city: z.string().optional(),
   postal_code: z.string().optional(),
+  country: z.string().optional(),
 
   // Physical
-  blood_type: z.string().optional(),
-  rhesus: z.string().optional(),
-  height: z.coerce.number().optional(),
-  weight: z.coerce.number().optional(),
+  blood_group: z.string().optional(),
+  height_cm: z.coerce.number().optional().or(z.literal('')),
+  weight_kg: z.coerce.number().optional().or(z.literal('')),
 
   // Lifestyle
-  smoking: z.boolean().optional(),
-  alcohol: z.boolean().optional(),
+  smoking: z.string().optional(),
+  alcohol: z.string().optional(),
+  exercise: z.string().optional(),
 
   // Clinical
   status: z.string().optional(),
   request: z.string().optional(),
   subfertility_type: z.string().optional(),
+  referral_source: z.string().optional(),
+  first_visit_date: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -57,41 +63,43 @@ interface PatientFormProps {
 }
 
 const nationalityOptions = [
-  { value: 'Greek', label: 'Greek' },
-  { value: 'Cypriot', label: 'Cypriot' },
-  { value: 'Albanian', label: 'Albanian' },
-  { value: 'Bulgarian', label: 'Bulgarian' },
-  { value: 'Romanian', label: 'Romanian' },
-  { value: 'British', label: 'British' },
-  { value: 'German', label: 'German' },
-  { value: 'French', label: 'French' },
-  { value: 'Italian', label: 'Italian' },
+  { value: '', label: 'Select...' },
+  { value: 'GR', label: 'Greek' },
+  { value: 'CY', label: 'Cypriot' },
+  { value: 'AL', label: 'Albanian' },
+  { value: 'BG', label: 'Bulgarian' },
+  { value: 'RO', label: 'Romanian' },
+  { value: 'GB', label: 'British' },
+  { value: 'DE', label: 'German' },
+  { value: 'FR', label: 'French' },
+  { value: 'IT', label: 'Italian' },
   { value: 'Other', label: 'Other' },
 ]
 
-const bloodTypeOptions = [
-  { value: 'A', label: 'A' },
-  { value: 'B', label: 'B' },
-  { value: 'AB', label: 'AB' },
-  { value: 'O', label: 'O' },
-]
-
-const rhesusOptions = [
-  { value: '+', label: 'Positive (+)' },
-  { value: '-', label: 'Negative (-)' },
+const bloodGroupOptions = [
+  { value: '', label: 'Select...' },
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
 ]
 
 const statusOptions = [
   { value: 'active', label: 'Active' },
-  { value: 'pregnant', label: 'Pregnant' },
-  { value: 'completed', label: 'Completed' },
   { value: 'inactive', label: 'Inactive' },
+  { value: 'archived', label: 'Archived' },
 ]
 
 const requestOptions = [
+  { value: '', label: 'Select...' },
   { value: 'IVF', label: 'IVF' },
   { value: 'ICSI', label: 'ICSI' },
   { value: 'IUI', label: 'IUI' },
+  { value: 'FET', label: 'Frozen Embryo Transfer' },
   { value: 'Egg Freezing', label: 'Egg Freezing' },
   { value: 'Fertility Preservation', label: 'Fertility Preservation' },
   { value: 'Consultation', label: 'Consultation' },
@@ -100,14 +108,32 @@ const requestOptions = [
 ]
 
 const subfertilityTypeOptions = [
+  { value: '', label: 'Select...' },
   { value: 'Primary', label: 'Primary' },
   { value: 'Secondary', label: 'Secondary' },
 ]
 
 const insuranceOptions = [
+  { value: '', label: 'Select...' },
   { value: 'EOPYY', label: 'EOPYY' },
   { value: 'Private', label: 'Private Insurance' },
   { value: 'Self-pay', label: 'Self-pay' },
+  { value: 'Other', label: 'Other' },
+]
+
+const yesNoUnknownOptions = [
+  { value: 'unknown', label: 'Unknown' },
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+]
+
+const referralOptions = [
+  { value: '', label: 'Select...' },
+  { value: 'Doctor Referral', label: 'Doctor Referral' },
+  { value: 'Internet', label: 'Internet Search' },
+  { value: 'Friend/Family', label: 'Friend/Family' },
+  { value: 'Social Media', label: 'Social Media' },
+  { value: 'Previous Patient', label: 'Previous Patient' },
   { value: 'Other', label: 'Other' },
 ]
 
@@ -119,8 +145,11 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
   } = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema) as any,
     defaultValues: {
-      smoking: false,
-      alcohol: false,
+      status: 'active',
+      smoking: 'unknown',
+      alcohol: 'unknown',
+      exercise: 'unknown',
+      country: 'GR',
       ...defaultValues,
     },
   })
@@ -135,20 +164,31 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Input
-              label="Surname *"
-              {...register('surname')}
-              error={errors.surname?.message}
+              label="AM (Patient ID) *"
+              type="number"
+              {...register('am')}
+              error={errors.am?.message}
+              hint="Unique patient number"
             />
             <Input
-              label="Name *"
-              {...register('name')}
-              error={errors.name?.message}
+              label="Last Name *"
+              {...register('last_name')}
+              error={errors.last_name?.message}
             />
             <Input
-              label="Date of Birth"
+              label="First Name *"
+              {...register('first_name')}
+              error={errors.first_name?.message}
+            />
+            <Input
+              label="Maiden Name"
+              {...register('maiden_name')}
+            />
+            <Input
+              label="Date of Birth *"
               type="date"
-              {...register('dob')}
-              error={errors.dob?.message}
+              {...register('date_of_birth')}
+              error={errors.date_of_birth?.message}
             />
             <Select
               label="Nationality"
@@ -171,33 +211,30 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
         </CardContent>
       </Card>
 
-      {/* Identification */}
+      {/* Identification & Insurance */}
       <Card>
         <CardHeader>
-          <CardTitle>Identification</CardTitle>
+          <CardTitle>Identification & Insurance</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Input
-              label="AM (Patient ID)"
-              type="number"
-              {...register('am')}
-              error={errors.am?.message}
-            />
             <Input
               label="AMKA"
               {...register('amka')}
               hint="Social Security Number"
             />
             <Input
-              label="AFM"
-              {...register('afm')}
-              hint="Tax ID"
+              label="EOPYY Number"
+              {...register('eopyy_number')}
             />
             <Select
-              label="Insurance"
+              label="Insurance Provider"
               options={insuranceOptions}
-              {...register('insurance')}
+              {...register('insurance_provider')}
+            />
+            <Input
+              label="Insurance Number"
+              {...register('insurance_number')}
             />
           </div>
         </CardContent>
@@ -214,11 +251,6 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
               label="Mobile Phone"
               type="tel"
               {...register('mobile')}
-            />
-            <Input
-              label="Phone"
-              type="tel"
-              {...register('phone')}
             />
             <Input
               label="Landline"
@@ -253,50 +285,44 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
           <CardTitle>Physical Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Select
-              label="Blood Type"
-              options={bloodTypeOptions}
-              {...register('blood_type')}
-            />
-            <Select
-              label="Rhesus"
-              options={rhesusOptions}
-              {...register('rhesus')}
+              label="Blood Group"
+              options={bloodGroupOptions}
+              {...register('blood_group')}
             />
             <Input
               label="Height (cm)"
               type="number"
-              {...register('height')}
+              {...register('height_cm')}
             />
             <Input
               label="Weight (kg)"
               type="number"
               step="0.1"
-              {...register('weight')}
+              {...register('weight_kg')}
             />
           </div>
 
           {/* Lifestyle */}
           <div className="mt-6 pt-6 border-t border-slate-100">
             <h4 className="text-sm font-medium text-slate-700 mb-4">Lifestyle</h4>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register('smoking')}
-                  className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-slate-700">Smoking</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register('alcohol')}
-                  className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-slate-700">Alcohol</span>
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Select
+                label="Smoking"
+                options={yesNoUnknownOptions}
+                {...register('smoking')}
+              />
+              <Select
+                label="Alcohol"
+                options={yesNoUnknownOptions}
+                {...register('alcohol')}
+              />
+              <Select
+                label="Exercise"
+                options={yesNoUnknownOptions}
+                {...register('exercise')}
+              />
             </div>
           </div>
         </CardContent>
@@ -323,6 +349,16 @@ export function PatientForm({ defaultValues, onSubmit, onCancel, isLoading, mode
               label="Subfertility Type"
               options={subfertilityTypeOptions}
               {...register('subfertility_type')}
+            />
+            <Select
+              label="Referral Source"
+              options={referralOptions}
+              {...register('referral_source')}
+            />
+            <Input
+              label="First Visit Date"
+              type="date"
+              {...register('first_visit_date')}
             />
           </div>
           <div className="mt-4">

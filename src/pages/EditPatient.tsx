@@ -30,17 +30,21 @@ export function EditPatient() {
     mutationFn: async (data: PatientFormData) => {
       // Calculate BMI if height and weight are provided
       let bmi: number | undefined
-      if (data.height && data.weight) {
-        const heightInMeters = data.height / 100
-        bmi = parseFloat((data.weight / (heightInMeters * heightInMeters)).toFixed(1))
+      if (data.height_cm && data.weight_kg) {
+        const heightInMeters = Number(data.height_cm) / 100
+        bmi = parseFloat((Number(data.weight_kg) / (heightInMeters * heightInMeters)).toFixed(1))
       }
+
+      // Clean up empty strings to nulls
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, value === '' ? null : value])
+      )
 
       const { data: updated, error } = await (supabase
         .from('patients_female') as any)
         .update({
-          ...data,
+          ...cleanedData,
           bmi,
-          phone: data.mobile || data.phone,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id as string)
@@ -57,7 +61,7 @@ export function EditPatient() {
       addToast({
         type: 'success',
         title: 'Patient updated',
-        message: `${updated.surname} ${updated.name} has been updated successfully.`,
+        message: `${updated.last_name} ${updated.first_name} has been updated successfully.`,
       })
       navigate(`/patients/${id}`)
     },
@@ -105,33 +109,37 @@ export function EditPatient() {
 
   // Transform patient data for the form
   const defaultValues: Partial<PatientFormData> = {
-    surname: patient.surname || '',
-    name: patient.name || '',
-    dob: patient.dob || '',
+    am: patient.am || undefined,
+    first_name: patient.first_name || '',
+    last_name: patient.last_name || '',
+    maiden_name: patient.maiden_name || '',
+    date_of_birth: patient.date_of_birth || '',
     nationality: patient.nationality || '',
     mother_name: patient.mother_name || '',
     father_name: patient.father_name || '',
     occupation: patient.occupation || '',
-    am: patient.am || undefined,
     amka: patient.amka || '',
-    afm: patient.afm || '',
-    insurance: patient.insurance || '',
-    phone: patient.phone || '',
+    eopyy_number: patient.eopyy_number || '',
+    insurance_provider: patient.insurance_provider || '',
+    insurance_number: patient.insurance_number || '',
     mobile: patient.mobile || '',
     landline: patient.landline || '',
     email: patient.email || '',
     address: patient.address || '',
     city: patient.city || '',
     postal_code: patient.postal_code || '',
-    blood_type: patient.blood_type || '',
-    rhesus: patient.rhesus || '',
-    height: patient.height || undefined,
-    weight: patient.weight || undefined,
-    smoking: patient.smoking || false,
-    alcohol: patient.alcohol || false,
-    status: patient.status || '',
+    country: patient.country || 'GR',
+    blood_group: patient.blood_group || '',
+    height_cm: patient.height_cm || undefined,
+    weight_kg: patient.weight_kg || undefined,
+    smoking: patient.smoking || 'unknown',
+    alcohol: patient.alcohol || 'unknown',
+    exercise: patient.exercise || 'unknown',
+    status: patient.status || 'active',
     request: patient.request || '',
     subfertility_type: patient.subfertility_type || '',
+    referral_source: patient.referral_source || '',
+    first_visit_date: patient.first_visit_date || '',
     notes: patient.notes || '',
   }
 
@@ -150,7 +158,7 @@ export function EditPatient() {
       <div className="mb-8">
         <h1 className="text-display text-slate-900">Edit Patient</h1>
         <p className="mt-1 text-body text-slate-500">
-          Update information for {patient.surname} {patient.name}
+          Update information for {patient.last_name} {patient.first_name}
         </p>
       </div>
 

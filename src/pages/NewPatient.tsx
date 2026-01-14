@@ -15,17 +15,21 @@ export function NewPatient() {
     mutationFn: async (data: PatientFormData) => {
       // Calculate BMI if height and weight are provided
       let bmi: number | undefined
-      if (data.height && data.weight) {
-        const heightInMeters = data.height / 100
-        bmi = parseFloat((data.weight / (heightInMeters * heightInMeters)).toFixed(1))
+      if (data.height_cm && data.weight_kg) {
+        const heightInMeters = Number(data.height_cm) / 100
+        bmi = parseFloat((Number(data.weight_kg) / (heightInMeters * heightInMeters)).toFixed(1))
       }
+
+      // Clean up empty strings to nulls
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, value === '' ? null : value])
+      )
 
       const { data: patient, error } = await supabase
         .from('patients_female')
         .insert({
-          ...data,
+          ...cleanedData,
           bmi,
-          phone: data.mobile || data.phone, // Use mobile as primary phone
         } as any)
         .select()
         .single()
@@ -40,7 +44,7 @@ export function NewPatient() {
       addToast({
         type: 'success',
         title: 'Patient created',
-        message: `${patient.surname} ${patient.name} has been added successfully.`,
+        message: `${patient.last_name} ${patient.first_name} has been added successfully.`,
       })
       navigate(`/patients/${patient.id}`)
     },
