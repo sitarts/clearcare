@@ -96,14 +96,13 @@ export function Dashboard() {
   ]
 
   const today = new Date()
-  const greeting = today.getHours() < 12 ? 'Good morning' : today.getHours() < 18 ? 'Good afternoon' : 'Good evening'
 
   return (
     <PageContainer>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-display text-slate-900">
-          {greeting}, Dr. Smith
+          Kolibianakis IVF
         </h1>
         <p className="mt-1 text-body text-slate-500">
           {format(today, 'EEEE, MMMM d, yyyy')}
