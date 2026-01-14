@@ -46,7 +46,7 @@ export function PatientDetail() {
         .from('cycles')
         .select('*')
         .eq('female_id', id as string)
-        .order('start_date', { ascending: false })
+        .order('stimulation_start_date', { ascending: false })
       return (data || []) as any[]
     },
     enabled: !!id,
@@ -110,13 +110,13 @@ export function PatientDetail() {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
               <span className="text-2xl font-semibold text-primary-600">
-                {patient.name?.[0]}{patient.surname?.[0]}
+                {patient.first_name?.[0]}{patient.last_name?.[0]}
               </span>
             </div>
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-h1 text-slate-900">
-                  {patient.surname} {patient.name}
+                  {patient.last_name} {patient.first_name}
                 </h1>
                 {patient.status && (
                   <StatusBadge status={patient.status as any} />
@@ -124,20 +124,20 @@ export function PatientDetail() {
               </div>
               <div className="flex items-center gap-4 mt-1 text-body text-slate-500">
                 <span className="font-mono">AM: {patient.am || 'N/A'}</span>
-                {patient.dob && (
+                {patient.date_of_birth && (
                   <>
                     <span>•</span>
-                    <span>{calculateAge(patient.dob)} years old</span>
+                    <span>{calculateAge(patient.date_of_birth)} years old</span>
                     <span>•</span>
-                    <span>{format(new Date(patient.dob), 'MMM d, yyyy')}</span>
+                    <span>{format(new Date(patient.date_of_birth), 'MMM d, yyyy')}</span>
                   </>
                 )}
               </div>
             </div>
           </div>
           <div className="flex gap-2">
-            {patient.phone && (
-              <a href={`tel:${patient.phone}`}>
+            {patient.mobile && (
+              <a href={`tel:${patient.mobile}`}>
                 <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />}>
                   Call
                 </Button>
@@ -192,10 +192,10 @@ export function PatientDetail() {
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {patient.phone && (
+                {patient.mobile && (
                   <div className="flex items-center gap-3">
                     <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-body">{patient.phone}</span>
+                    <span className="text-body">{patient.mobile}</span>
                   </div>
                 )}
                 {patient.email && (
@@ -243,18 +243,18 @@ export function PatientDetail() {
                               {cycle.cycle_type || 'IVF'} - Cycle #{cycle.cycle_number || 1}
                             </p>
                             <p className="text-small text-slate-500">
-                              {cycle.start_date ? format(new Date(cycle.start_date), 'MMM d, yyyy') : 'Not started'}
+                              {cycle.stimulation_start_date ? format(new Date(cycle.stimulation_start_date), 'MMM d, yyyy') : 'Not started'}
                             </p>
                           </div>
                         </div>
                         <Badge
                           variant={
-                            cycle.status === 'completed' ? 'success' :
-                            cycle.status === 'cancelled' ? 'error' :
-                            cycle.pregnant ? 'teal' : 'info'
+                            cycle.cycle_status === 'completed' ? 'success' :
+                            cycle.cycle_status === 'cancelled' ? 'error' :
+                            cycle.outcome === 'pregnant' ? 'teal' : 'info'
                           }
                         >
-                          {cycle.pregnant ? 'Pregnant' : cycle.status || 'Active'}
+                          {cycle.outcome === 'pregnant' ? 'Pregnant' : cycle.cycle_status || 'Active'}
                         </Badge>
                       </Link>
                     ))}
@@ -277,12 +277,12 @@ export function PatientDetail() {
                 <dl className="space-y-4">
                   <div>
                     <dt className="text-small text-slate-500">Full Name</dt>
-                    <dd className="text-body font-medium">{patient.surname} {patient.name}</dd>
+                    <dd className="text-body font-medium">{patient.last_name} {patient.first_name}</dd>
                   </div>
                   <div>
                     <dt className="text-small text-slate-500">Date of Birth</dt>
                     <dd className="text-body font-medium">
-                      {patient.dob ? format(new Date(patient.dob), 'MMMM d, yyyy') : '-'}
+                      {patient.date_of_birth ? format(new Date(patient.date_of_birth), 'MMMM d, yyyy') : '-'}
                     </dd>
                   </div>
                   <div>
@@ -312,12 +312,12 @@ export function PatientDetail() {
                     <dd className="text-body font-mono font-medium">{patient.amka || '-'}</dd>
                   </div>
                   <div>
-                    <dt className="text-small text-slate-500">AFM</dt>
-                    <dd className="text-body font-mono font-medium">{patient.afm || '-'}</dd>
+                    <dt className="text-small text-slate-500">EOPYY Number</dt>
+                    <dd className="text-body font-mono font-medium">{patient.eopyy_number || '-'}</dd>
                   </div>
                   <div>
                     <dt className="text-small text-slate-500">Insurance</dt>
-                    <dd className="text-body font-medium">{patient.insurance || '-'}</dd>
+                    <dd className="text-body font-medium">{patient.insurance_provider || '-'}</dd>
                   </div>
                 </dl>
               </CardContent>
@@ -332,13 +332,13 @@ export function PatientDetail() {
                   <div>
                     <dt className="text-small text-slate-500">Blood Type</dt>
                     <dd className="text-body font-medium">
-                      {patient.blood_type ? `${patient.blood_type}${patient.rhesus || ''}` : '-'}
+                      {patient.blood_group || '-'}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-small text-slate-500">Height / Weight</dt>
                     <dd className="text-body font-medium">
-                      {patient.height ? `${patient.height} cm` : '-'} / {patient.weight ? `${patient.weight} kg` : '-'}
+                      {patient.height_cm ? `${patient.height_cm} cm` : '-'} / {patient.weight_kg ? `${patient.weight_kg} kg` : '-'}
                     </dd>
                   </div>
                   <div>
@@ -357,7 +357,7 @@ export function PatientDetail() {
                 <dl className="space-y-4">
                   <div>
                     <dt className="text-small text-slate-500">Mobile Phone</dt>
-                    <dd className="text-body font-medium">{patient.mobile || patient.phone || '-'}</dd>
+                    <dd className="text-body font-medium">{patient.mobile || '-'}</dd>
                   </div>
                   <div>
                     <dt className="text-small text-slate-500">Email</dt>
@@ -414,15 +414,15 @@ export function PatientDetail() {
                           <td className="py-3 px-4 font-mono">{cycle.cycle_number || '-'}</td>
                           <td className="py-3 px-4">{cycle.cycle_type || 'IVF'}</td>
                           <td className="py-3 px-4">
-                            {cycle.start_date ? format(new Date(cycle.start_date), 'MMM d, yyyy') : '-'}
+                            {cycle.stimulation_start_date ? format(new Date(cycle.stimulation_start_date), 'MMM d, yyyy') : '-'}
                           </td>
                           <td className="py-3 px-4">
-                            <Badge variant={cycle.status === 'completed' ? 'success' : 'info'}>
-                              {cycle.status || 'Active'}
+                            <Badge variant={cycle.cycle_status === 'completed' ? 'success' : 'info'}>
+                              {cycle.cycle_status || 'Active'}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
-                            {cycle.pregnant ? (
+                            {cycle.outcome === 'pregnant' ? (
                               <Badge variant="teal">Pregnant</Badge>
                             ) : cycle.outcome ? (
                               <span className="text-body">{cycle.outcome}</span>

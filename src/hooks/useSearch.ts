@@ -16,9 +16,9 @@ async function searchPatients(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return []
 
   const { data, error } = await (supabase
-    .from('patients')
-    .select('id, first_name, last_name, email, phone')
-    .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+    .from('patients_female')
+    .select('id, am, first_name, last_name, email, mobile')
+    .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%,am.eq.${parseInt(query) || 0}`)
     .limit(5) as any)
 
   if (error || !data) return []
@@ -26,8 +26,8 @@ async function searchPatients(query: string): Promise<SearchResult[]> {
   return data.map((patient: any) => ({
     id: patient.id,
     type: 'patient' as SearchResultType,
-    title: `${patient.first_name} ${patient.last_name}`,
-    subtitle: patient.email || patient.phone || 'Patient',
+    title: `${patient.last_name} ${patient.first_name}`,
+    subtitle: patient.email || patient.mobile || `AM: ${patient.am}`,
     path: `/patients/${patient.id}`,
   }))
 }
@@ -42,13 +42,13 @@ async function searchCycles(query: string): Promise<SearchResult[]> {
       id,
       cycle_number,
       cycle_type,
-      status,
-      patients!inner (
+      cycle_status,
+      patients_female!inner (
         first_name,
         last_name
       )
     `)
-    .or(`cycle_type.ilike.%${query}%,status.ilike.%${query}%`)
+    .or(`cycle_type.ilike.%${query}%,cycle_status.ilike.%${query}%`)
     .limit(5) as any)
 
   if (error || !data) return []
@@ -57,7 +57,7 @@ async function searchCycles(query: string): Promise<SearchResult[]> {
     id: cycle.id,
     type: 'cycle' as SearchResultType,
     title: `Cycle #${cycle.cycle_number} - ${cycle.cycle_type}`,
-    subtitle: `${cycle.patients.first_name} ${cycle.patients.last_name} • ${cycle.status}`,
+    subtitle: `${cycle.patients_female.last_name} ${cycle.patients_female.first_name} • ${cycle.cycle_status || 'Active'}`,
     path: `/cycles/${cycle.id}`,
   }))
 }

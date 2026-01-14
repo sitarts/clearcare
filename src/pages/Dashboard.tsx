@@ -31,7 +31,7 @@ export function Dashboard() {
       const { count } = await supabase
         .from('cycles')
         .select('*', { count: 'exact', head: true })
-        .in('status', ['stimulation', 'trigger', 'retrieval', 'transfer', 'tww'])
+        .in('cycle_status', ['stimulation', 'trigger', 'retrieval', 'transfer', 'tww', 'planned', 'monitoring'])
       return count || 0
     },
   })
@@ -41,7 +41,7 @@ export function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from('patients_female')
-        .select('id, am, surname, name, phone, created_at')
+        .select('id, am, last_name, first_name, mobile, created_at')
         .order('created_at', { ascending: false })
         .limit(5)
       return (data || []) as any[]
@@ -57,10 +57,10 @@ export function Dashboard() {
           id,
           cycle_number,
           cycle_type,
-          status,
-          start_date,
+          cycle_status,
+          stimulation_start_date,
           female_id,
-          patients_female (surname, name)
+          patients_female (last_name, first_name)
         `)
         .order('created_at', { ascending: false })
         .limit(5)
@@ -162,12 +162,12 @@ export function Dashboard() {
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-primary-600">
-                        {patient.name?.[0]}{patient.surname?.[0]}
+                        {patient.first_name?.[0]}{patient.last_name?.[0]}
                       </span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900">
-                        {patient.surname} {patient.name}
+                        {patient.last_name} {patient.first_name}
                       </p>
                       <p className="text-small text-slate-500">
                         AM: {patient.am || 'N/A'}
@@ -208,7 +208,7 @@ export function Dashboard() {
                     </div>
                     <div>
                       <p className="font-medium text-slate-900">
-                        {cycle.patients_female?.surname} {cycle.patients_female?.name}
+                        {cycle.patients_female?.last_name} {cycle.patients_female?.first_name}
                       </p>
                       <p className="text-small text-slate-500">
                         {cycle.cycle_type || 'IVF'} - Cycle #{cycle.cycle_number || 1}
@@ -217,14 +217,14 @@ export function Dashboard() {
                   </div>
                   <Badge
                     variant={
-                      cycle.status === 'completed'
+                      cycle.cycle_status === 'completed'
                         ? 'success'
-                        : cycle.status === 'cancelled'
+                        : cycle.cycle_status === 'cancelled'
                         ? 'error'
                         : 'info'
                     }
                   >
-                    {cycle.status || 'Active'}
+                    {cycle.cycle_status || 'Active'}
                   </Badge>
                 </Link>
               ))}

@@ -7,12 +7,12 @@ import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 
 const statusColumns = [
-  { id: 'planning', label: 'Planning', color: 'bg-slate-100' },
+  { id: 'planned', label: 'Planned', color: 'bg-slate-100' },
   { id: 'stimulation', label: 'Stimulation', color: 'bg-blue-100' },
   { id: 'trigger', label: 'Trigger', color: 'bg-purple-100' },
-  { id: 'retrieval', label: 'Retrieval', color: 'bg-amber-100' },
+  { id: 'opu', label: 'OPU', color: 'bg-amber-100' },
   { id: 'transfer', label: 'Transfer', color: 'bg-teal-100' },
-  { id: 'tww', label: '2WW', color: 'bg-pink-100' },
+  { id: 'luteal', label: 'Luteal', color: 'bg-pink-100' },
 ]
 
 export function Cycles() {
@@ -23,7 +23,7 @@ export function Cycles() {
         .from('cycles')
         .select(`
           *,
-          patients_female (id, surname, name, am)
+          patients_female (id, last_name, first_name, am)
         `)
         .order('created_at', { ascending: false })
       return data || []
@@ -31,7 +31,7 @@ export function Cycles() {
   })
 
   const getCyclesByStatus = (status: string) => {
-    return cycles?.filter((c: any) => c.status === status) || []
+    return cycles?.filter((c: any) => c.cycle_status === status) || []
   }
 
   return (
@@ -79,7 +79,7 @@ export function Cycles() {
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <p className="font-medium text-slate-900">
-                              {cycle.patients_female?.surname} {cycle.patients_female?.name}
+                              {cycle.patients_female?.last_name} {cycle.patients_female?.first_name}
                             </p>
                             <p className="text-small text-slate-500 font-mono">
                               AM: {cycle.patients_female?.am || 'N/A'}
@@ -91,8 +91,8 @@ export function Cycles() {
                         </div>
                         <div className="flex items-center justify-between text-small text-slate-500">
                           <span>Cycle #{cycle.cycle_number || 1}</span>
-                          {cycle.start_date && (
-                            <span>{format(new Date(cycle.start_date), 'MMM d')}</span>
+                          {cycle.stimulation_start_date && (
+                            <span>{format(new Date(cycle.stimulation_start_date), 'MMM d')}</span>
                           )}
                         </div>
                       </Card>
@@ -137,7 +137,7 @@ export function Cycles() {
                       </div>
                       <div>
                         <p className="font-medium text-slate-900">
-                          {cycle.patients_female?.surname} {cycle.patients_female?.name}
+                          {cycle.patients_female?.last_name} {cycle.patients_female?.first_name}
                         </p>
                         <p className="text-small text-slate-500 font-mono">
                           AM: {cycle.patients_female?.am || 'N/A'}
@@ -148,20 +148,20 @@ export function Cycles() {
                   <td className="py-3 px-6">{cycle.cycle_type || 'IVF'}</td>
                   <td className="py-3 px-6 font-mono">{cycle.cycle_number || '-'}</td>
                   <td className="py-3 px-6">
-                    {cycle.start_date ? format(new Date(cycle.start_date), 'MMM d, yyyy') : '-'}
+                    {cycle.stimulation_start_date ? format(new Date(cycle.stimulation_start_date), 'MMM d, yyyy') : '-'}
                   </td>
                   <td className="py-3 px-6">
                     <Badge
                       variant={
-                        cycle.status === 'completed' ? 'success' :
-                        cycle.status === 'cancelled' ? 'error' : 'info'
+                        cycle.cycle_status === 'completed' ? 'success' :
+                        cycle.cycle_status === 'cancelled' ? 'error' : 'info'
                       }
                     >
-                      {cycle.status || 'Active'}
+                      {cycle.cycle_status || 'Active'}
                     </Badge>
                   </td>
                   <td className="py-3 px-6">
-                    {cycle.pregnant ? (
+                    {cycle.outcome === 'pregnant' ? (
                       <Badge variant="teal">Pregnant</Badge>
                     ) : (
                       cycle.outcome || '-'

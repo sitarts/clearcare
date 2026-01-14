@@ -16,10 +16,10 @@ export function Patients() {
       let query = supabase
         .from('patients_female')
         .select('*')
-        .order('surname', { ascending: true })
+        .order('last_name', { ascending: true })
 
       if (search) {
-        query = query.or(`surname.ilike.%${search}%,name.ilike.%${search}%,am.eq.${parseInt(search) || 0}`)
+        query = query.or(`last_name.ilike.%${search}%,first_name.ilike.%${search}%,am.eq.${parseInt(search) || 0}`)
       }
 
       if (statusFilter) {
@@ -32,9 +32,9 @@ export function Patients() {
     },
   })
 
-  const calculateAge = (dob: string | null) => {
-    if (!dob) return null
-    const birthDate = new Date(dob)
+  const calculateAge = (date_of_birth: string | null) => {
+    if (!date_of_birth) return null
+    const birthDate = new Date(date_of_birth)
     const today = new Date()
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
@@ -110,7 +110,7 @@ export function Patients() {
                   {/* Avatar */}
                   <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-lg font-semibold text-primary-600">
-                      {patient.name?.[0]}{patient.surname?.[0]}
+                      {patient.first_name?.[0]}{patient.last_name?.[0]}
                     </span>
                   </div>
 
@@ -118,27 +118,27 @@ export function Patients() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <h3 className="font-semibold text-slate-900 truncate">
-                        {patient.surname} {patient.name}
+                        {patient.last_name} {patient.first_name}
                       </h3>
                       <ArrowRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
                     </div>
 
                     <div className="flex items-center gap-2 text-small text-slate-500 mb-2">
                       <span className="font-mono">AM: {patient.am || 'N/A'}</span>
-                      {patient.dob && (
+                      {patient.date_of_birth && (
                         <>
                           <span>•</span>
-                          <span>{calculateAge(patient.dob)} years</span>
+                          <span>{calculateAge(patient.date_of_birth)} years</span>
                         </>
                       )}
                     </div>
 
                     {/* Contact */}
                     <div className="flex items-center gap-4 text-small text-slate-500">
-                      {patient.phone && (
+                      {patient.mobile && (
                         <span className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />
-                          {patient.phone}
+                          {patient.mobile}
                         </span>
                       )}
                     </div>

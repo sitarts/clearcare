@@ -22,38 +22,38 @@ export interface Database {
 
 export interface PatientFemale {
   id: string
-  am: number | null
-  surname: string
-  name: string
-  dob: string | null
-  age: number | null
-  email: string | null
-  phone: string | null
-  mobile: string | null
-  landline: string | null
+  am: number
+  first_name: string
+  last_name: string
+  maiden_name: string | null
+  date_of_birth: string
+  nationality: string | null
   address: string | null
   city: string | null
   postal_code: string | null
-  nationality: string | null
+  country: string | null
+  mobile: string | null
+  landline: string | null
+  email: string | null
+  height_cm: number | null
+  weight_kg: number | null
+  bmi: number | null
+  blood_group: string | null
+  insurance_provider: string | null
+  insurance_number: string | null
+  eopyy_number: string | null
+  amka: string | null
+  smoking: string | null
+  alcohol: string | null
+  exercise: string | null
+  status: string | null
+  status_reason: string | null
+  notes: string | null
   mother_name: string | null
   father_name: string | null
   occupation: string | null
-  insurance: string | null
-  amka: string | null
-  afm: string | null
-  blood_type: string | null
-  rhesus: string | null
-  height: number | null
-  weight: number | null
-  bmi: number | null
-  smoking: boolean | null
-  alcohol: boolean | null
-  status: string | null
-  status_reason: string | null
-  partner_id: string | null
-  request: string | null
-  subfertility_type: string | null
-  notes: string | null
+  referral_source: string | null
+  first_visit_date: string | null
   created_at: string
   updated_at: string
 }
@@ -90,24 +90,41 @@ export interface PatientMale {
 export interface Cycle {
   id: string
   female_id: string
-  cycle_number: number | null
-  cycle_type: string | null
-  start_date: string | null
-  end_date: string | null
-  status: string | null
-  outcome: string | null
+  male_id: string | null
+  couple_id: string
+  cycle_number: number
+  am_female: number
+  am_male: number | null
+  cycle_type: string
+  cycle_status: string | null
+  lmp_date: string | null
+  cycle_day_1: string | null
+  stimulation_start_date: string | null
+  trigger_date: string | null
+  opu_date: string | null
+  et_date: string | null
+  pregnancy_test_date: string | null
   protocol: string | null
-  medication: string | null
-  oocytes_retrieved: number | null
-  mature_oocytes: number | null
-  fertilized: number | null
-  embryos_transferred: number | null
-  embryos_frozen: number | null
-  transfer_date: string | null
-  beta_hcg_date: string | null
-  beta_hcg_value: number | null
-  pregnant: boolean | null
-  notes: string | null
+  fsh_type: string | null
+  fsh_starting_dose: number | null
+  total_fsh_units: number | null
+  stimulation_days: number | null
+  trigger_type: string | null
+  n_cocs: number | null
+  n_miis: number | null
+  n_2pn: number | null
+  n_transferred: number | null
+  transfer_day: number | null
+  n_frozen: number | null
+  pregnancy_test_result: string | null
+  bhcg_value: number | null
+  bhcg_date: string | null
+  outcome: string | null
+  doctor: string | null
+  embryologist: string | null
+  stimulation_notes: string | null
+  transfer_notes: string | null
+  outcome_notes: string | null
   created_at: string
   updated_at: string
 }

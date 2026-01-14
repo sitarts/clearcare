@@ -63,24 +63,24 @@ export function Reports() {
     queryFn: async () => {
       // Get patients count
       const { count: totalPatients } = await (supabase
-        .from('patients')
+        .from('patients_female')
         .select('*', { count: 'exact', head: true }) as any)
 
       // Get cycles data
       const { data: cycles } = await (supabase
         .from('cycles')
-        .select('status, cycle_type') as any)
+        .select('cycle_status, cycle_type, outcome') as any)
 
       const cyclesArray = cycles || []
       const totalCycles = cyclesArray.length
       const activeCycles = cyclesArray.filter((c: any) =>
-        ['stimulation', 'retrieval', 'transfer', 'tww'].includes(c.status)
+        ['stimulation', 'opu', 'transfer', 'luteal', 'planned', 'monitoring'].includes(c.cycle_status)
       ).length
       const completedCycles = cyclesArray.filter((c: any) =>
-        c.status === 'completed'
+        c.cycle_status === 'completed'
       ).length
       const successfulCycles = cyclesArray.filter((c: any) =>
-        c.status === 'pregnant'
+        c.outcome === 'pregnant' || c.outcome === 'clinical_pregnancy'
       ).length
 
       // Get embryos count
@@ -90,7 +90,7 @@ export function Reports() {
 
       // Get average patient age
       const { data: patients } = await (supabase
-        .from('patients')
+        .from('patients_female')
         .select('date_of_birth') as any)
 
       let avgPatientAge = 0
@@ -145,13 +145,14 @@ export function Reports() {
     queryFn: async () => {
       const { data } = await (supabase
         .from('cycles')
-        .select('status') as any)
+        .select('cycle_status') as any)
 
       if (!data) return []
 
       const counts: Record<string, number> = {}
       data.forEach((cycle: any) => {
-        counts[cycle.status] = (counts[cycle.status] || 0) + 1
+        const status = cycle.cycle_status || 'unknown'
+        counts[status] = (counts[status] || 0) + 1
       })
 
       return Object.entries(counts).map(([status, count]) => ({
@@ -176,11 +177,11 @@ export function Reports() {
         const { count: cycleCount } = await (supabase
           .from('cycles')
           .select('*', { count: 'exact', head: true })
-          .gte('start_date', startOfMonth)
-          .lte('start_date', endOfMonth) as any)
+          .gte('stimulation_start_date', startOfMonth)
+          .lte('stimulation_start_date', endOfMonth) as any)
 
         const { count: patientCount } = await (supabase
-          .from('patients')
+          .from('patients_female')
           .select('*', { count: 'exact', head: true })
           .gte('created_at', startOfMonth)
           .lte('created_at', endOfMonth + 'T23:59:59') as any)

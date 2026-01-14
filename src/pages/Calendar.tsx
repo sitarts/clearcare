@@ -11,14 +11,13 @@ import { Button, Modal, ModalFooter } from '../components/ui'
 
 interface Appointment {
   id: string
-  patient_id: string
-  title: string
-  description: string | null
-  appointment_date: string
-  appointment_time: string
-  duration_minutes: number
-  type: 'consultation' | 'procedure' | 'followup' | 'ultrasound' | 'lab'
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
+  female_id: string | null
+  scheduled_date: string
+  scheduled_time: string
+  duration_minutes: number | null
+  appointment_type: string
+  status: string | null
+  notes: string | null
   patient?: {
     first_name: string
     last_name: string
@@ -67,11 +66,11 @@ export function Calendar() {
         .from('appointments')
         .select(`
           *,
-          patient:patients(first_name, last_name)
+          patient:patients_female(first_name, last_name)
         `)
-        .gte('appointment_date', startOfMonth)
-        .lte('appointment_date', endOfMonth)
-        .order('appointment_time') as any)
+        .gte('scheduled_date', startOfMonth)
+        .lte('scheduled_date', endOfMonth)
+        .order('scheduled_time') as any)
 
       if (error) throw error
       return (data || []) as Appointment[]
@@ -83,7 +82,7 @@ export function Calendar() {
     queryKey: ['patients-list'],
     queryFn: async () => {
       const { data, error } = await (supabase
-        .from('patients')
+        .from('patients_female')
         .select('id, first_name, last_name')
         .order('last_name') as any)
 
@@ -125,10 +124,10 @@ export function Calendar() {
   const appointmentsByDate = useMemo(() => {
     const grouped: Record<string, Appointment[]> = {}
     appointments.forEach((apt) => {
-      if (!grouped[apt.appointment_date]) {
-        grouped[apt.appointment_date] = []
+      if (!grouped[apt.scheduled_date]) {
+        grouped[apt.scheduled_date] = []
       }
-      grouped[apt.appointment_date].push(apt)
+      grouped[apt.scheduled_date].push(apt)
     })
     return grouped
   }, [appointments])
@@ -154,7 +153,7 @@ export function Calendar() {
   const handleAppointmentClick = (apt: Appointment, e: React.MouseEvent) => {
     e.stopPropagation()
     setEditingAppointment(apt)
-    setSelectedDate(new Date(apt.appointment_date))
+    setSelectedDate(new Date(apt.scheduled_date))
     setIsModalOpen(true)
   }
 
@@ -257,7 +256,7 @@ export function Calendar() {
                   {/* Appointments */}
                   <div className="space-y-1">
                     {dayAppointments.slice(0, 3).map((apt) => {
-                      const typeConfig = APPOINTMENT_TYPES.find((t) => t.value === apt.type)
+                      const typeConfig = APPOINTMENT_TYPES.find((t) => t.value === apt.appointment_type)
                       return (
                         <button
                           key={apt.id}
@@ -268,8 +267,8 @@ export function Calendar() {
                             hover:opacity-90 transition-opacity
                           `}
                         >
-                          <span className="hidden md:inline">{apt.appointment_time.slice(0, 5)} </span>
-                          {apt.title}
+                          <span className="hidden md:inline">{apt.scheduled_time?.slice(0, 5)} </span>
+                          {apt.appointment_type}
                         </button>
                       )
                     })}
@@ -324,14 +323,13 @@ function AppointmentModal({
   onSuccess,
 }: AppointmentModalProps) {
   const [formData, setFormData] = useState({
-    patient_id: '',
-    title: '',
-    description: '',
-    appointment_date: '',
-    appointment_time: '09:00',
+    female_id: '',
+    notes: '',
+    scheduled_date: '',
+    scheduled_time: '09:00',
     duration_minutes: 30,
-    type: 'consultation' as Appointment['type'],
-    status: 'scheduled' as Appointment['status'],
+    appointment_type: 'consultation',
+    status: 'scheduled',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -341,24 +339,22 @@ function AppointmentModal({
     if (isOpen) {
       if (appointment) {
         setFormData({
-          patient_id: appointment.patient_id,
-          title: appointment.title,
-          description: appointment.description || '',
-          appointment_date: appointment.appointment_date,
-          appointment_time: appointment.appointment_time.slice(0, 5),
-          duration_minutes: appointment.duration_minutes,
-          type: appointment.type,
-          status: appointment.status,
+          female_id: appointment.female_id || '',
+          notes: appointment.notes || '',
+          scheduled_date: appointment.scheduled_date,
+          scheduled_time: appointment.scheduled_time?.slice(0, 5) || '09:00',
+          duration_minutes: appointment.duration_minutes || 30,
+          appointment_type: appointment.appointment_type || 'consultation',
+          status: appointment.status || 'scheduled',
         })
       } else {
         setFormData({
-          patient_id: '',
-          title: '',
-          description: '',
-          appointment_date: selectedDate?.toISOString().split('T')[0] || '',
-          appointment_time: '09:00',
+          female_id: '',
+          notes: '',
+          scheduled_date: selectedDate?.toISOString().split('T')[0] || '',
+          scheduled_time: '09:00',
           duration_minutes: 30,
-          type: 'consultation',
+          appointment_type: 'consultation',
           status: 'scheduled',
         })
       }
@@ -366,23 +362,22 @@ function AppointmentModal({
   })
 
   // Update form when selectedDate or appointment changes
-  if (isOpen && selectedDate && !appointment && formData.appointment_date !== selectedDate.toISOString().split('T')[0]) {
+  if (isOpen && selectedDate && !appointment && formData.scheduled_date !== selectedDate.toISOString().split('T')[0]) {
     setFormData((prev) => ({
       ...prev,
-      appointment_date: selectedDate.toISOString().split('T')[0],
+      scheduled_date: selectedDate.toISOString().split('T')[0],
     }))
   }
 
-  if (isOpen && appointment && formData.patient_id !== appointment.patient_id) {
+  if (isOpen && appointment && formData.female_id !== appointment.female_id) {
     setFormData({
-      patient_id: appointment.patient_id,
-      title: appointment.title,
-      description: appointment.description || '',
-      appointment_date: appointment.appointment_date,
-      appointment_time: appointment.appointment_time.slice(0, 5),
-      duration_minutes: appointment.duration_minutes,
-      type: appointment.type,
-      status: appointment.status,
+      female_id: appointment.female_id || '',
+      notes: appointment.notes || '',
+      scheduled_date: appointment.scheduled_date,
+      scheduled_time: appointment.scheduled_time?.slice(0, 5) || '09:00',
+      duration_minutes: appointment.duration_minutes || 30,
+      appointment_type: appointment.appointment_type || 'consultation',
+      status: appointment.status || 'scheduled',
     })
   }
 
@@ -394,7 +389,7 @@ function AppointmentModal({
     try {
       const data = {
         ...formData,
-        appointment_time: formData.appointment_time + ':00',
+        scheduled_time: formData.scheduled_time + ':00',
       }
 
       if (appointment) {
@@ -458,32 +453,18 @@ function AppointmentModal({
               Patient
             </label>
             <select
-              value={formData.patient_id}
-              onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
+              value={formData.female_id}
+              onChange={(e) => setFormData({ ...formData, female_id: e.target.value })}
               required
               className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="">Select a patient</option>
               {patients.map((patient) => (
                 <option key={patient.id} value={patient.id}>
-                  {patient.first_name} {patient.last_name}
+                  {patient.last_name} {patient.first_name}
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Title
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              placeholder="e.g., Initial Consultation"
-              className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -493,8 +474,8 @@ function AppointmentModal({
               </label>
               <input
                 type="date"
-                value={formData.appointment_date}
-                onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
+                value={formData.scheduled_date}
+                onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
                 required
                 className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
@@ -505,8 +486,8 @@ function AppointmentModal({
               </label>
               <input
                 type="time"
-                value={formData.appointment_time}
-                onChange={(e) => setFormData({ ...formData, appointment_time: e.target.value })}
+                value={formData.scheduled_time}
+                onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
                 required
                 className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
@@ -519,8 +500,8 @@ function AppointmentModal({
                 Type
               </label>
               <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as Appointment['type'] })}
+                value={formData.appointment_type}
+                onChange={(e) => setFormData({ ...formData, appointment_type: e.target.value })}
                 className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {APPOINTMENT_TYPES.map((type) => (
@@ -556,7 +537,7 @@ function AppointmentModal({
               </label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as Appointment['status'] })}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="scheduled">Scheduled</option>
@@ -572,8 +553,8 @@ function AppointmentModal({
               Notes (optional)
             </label>
             <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
               placeholder="Add any notes..."
               className="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
