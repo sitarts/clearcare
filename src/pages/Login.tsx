@@ -41,10 +41,10 @@ export function Login() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl font-semibold text-slate-900">
-          Sign in to ClearCare
+          Kolibianakis IVF
         </h2>
         <p className="mt-2 text-center text-sm text-slate-500">
-          Fertility clinic management system
+          Sign in to continue
         </p>
       </div>
 
@@ -144,7 +144,7 @@ export function Login() {
                 <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">New to ClearCare?</span>
+                <span className="px-2 bg-white text-slate-500">Don't have an account?</span>
               </div>
             </div>
 

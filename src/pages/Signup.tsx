@@ -80,7 +80,7 @@ export function Signup() {
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-slate-500">
-          Get started with ClearCare
+          Get started with Kolibianakis IVF
         </p>
       </div>
 

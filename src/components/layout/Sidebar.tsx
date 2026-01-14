@@ -77,7 +77,7 @@ export function Sidebar({ mobileOpen, onMobileClose, collapsed, onCollapsedChang
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <Baby className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-slate-900">ClearCare</span>
+              <span className="font-semibold text-slate-900">Kolibianakis IVF</span>
             </div>
           )}
           {collapsed && (
