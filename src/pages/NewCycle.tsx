@@ -13,15 +13,32 @@ export function NewCycle() {
   const queryClient = useQueryClient()
   const { addToast } = useToast()
 
-  // Fetch patients for dropdown
+  // Fetch patients with their couple IDs for dropdown
   const { data: patients } = useQuery({
     queryKey: ['patientsDropdown'],
     queryFn: async () => {
-      const { data } = await supabase
+      // Get patients
+      const { data: patientsData } = await supabase
         .from('patients_female')
         .select('id, first_name, last_name, am')
         .order('last_name', { ascending: true })
-      return (data || []) as any[]
+
+      if (!patientsData || patientsData.length === 0) return []
+
+      // Get couples for these patients
+      const patientIds = patientsData.map((p: any) => p.id)
+      const { data: couplesData } = await supabase
+        .from('couples')
+        .select('id, female_id')
+        .in('female_id', patientIds)
+
+      const couples = (couplesData || []) as { id: string; female_id: string }[]
+
+      // Merge couple_id into patients
+      return patientsData.map((p: any) => ({
+        ...p,
+        couple_id: couples.find(c => c.female_id === p.id)?.id
+      }))
     },
   })
 

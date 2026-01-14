@@ -10,6 +10,7 @@ const cycleSchema = z.object({
   cycle_type: z.string().min(1, 'Cycle type is required'),
 
   // Auto-populated from patient
+  couple_id: z.string().optional(),
   am_female: z.coerce.number().optional(),
 
   // Optional fields
@@ -40,6 +41,7 @@ interface Patient {
   first_name: string
   last_name: string
   am: number
+  couple_id?: string
 }
 
 interface CycleFormProps {
@@ -126,11 +128,12 @@ export function CycleForm({
   const selectedPatientId = watch('female_id')
   const selectedPatient = patients.find(p => p.id === selectedPatientId)
 
-  // Update am_female when patient changes
+  // Update couple_id and am_female when patient changes
   const handlePatientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const patientId = e.target.value
     const patient = patients.find(p => p.id === patientId)
     if (patient) {
+      setValue('couple_id', patient.couple_id || '')
       setValue('am_female', patient.am)
     }
   }
@@ -214,7 +217,8 @@ export function CycleForm({
             />
           </div>
 
-          {/* Hidden field for am_female */}
+          {/* Hidden fields for couple_id and am_female */}
+          <input type="hidden" {...register('couple_id')} />
           <input type="hidden" {...register('am_female')} />
         </CardContent>
       </Card>
