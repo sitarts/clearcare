@@ -19,7 +19,7 @@ export function NewCycle() {
     queryFn: async () => {
       const { data } = await supabase
         .from('patients_female')
-        .select('id, first_name, last_name, am, couple_id')
+        .select('id, first_name, last_name, am')
         .order('last_name', { ascending: true })
       return (data || []) as any[]
     },
