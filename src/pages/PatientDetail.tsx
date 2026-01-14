@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { PageContainer } from '../components/layout'
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, StatusBadge } from '../components/ui'
+import { MedicalHistoryTab } from '../components/patient'
 import {
   ArrowLeft,
   Edit,
@@ -376,15 +377,7 @@ export function PatientDetail() {
         )}
 
         {activeTab === 'history' && (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Heart className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-h3 text-slate-900 mb-2">Medical History</h3>
-              <p className="text-body text-slate-500">
-                Coming soon - View gynecological, obstetric, surgical, and family history
-              </p>
-            </CardContent>
-          </Card>
+          <MedicalHistoryTab patientId={id!} />
         )}
 
         {activeTab === 'cycles' && (

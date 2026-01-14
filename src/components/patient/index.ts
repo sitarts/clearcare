@@ -1,0 +1,1 @@
+export { MedicalHistoryTab } from './MedicalHistoryTab'
